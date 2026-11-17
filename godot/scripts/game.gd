@@ -285,48 +285,74 @@ func _door_rect() -> Rect2:
 # ------------------------------------------------------------------ main loop
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		_handle_key(event)
+	elif _is_tap(event):
+		# clicking or tapping the screen always works, on desktop and on touch
+		_advance()
+
+
+## Left mouse button or a screen touch going down.
+func _is_tap(event: InputEvent) -> bool:
+	if event is InputEventMouseButton:
+		return event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if event is InputEventScreenTouch:
+		return event.pressed
+	return false
+
+
+func _handle_key(event: InputEvent) -> void:
 	if event.is_action_pressed("mute"):
-		muted = not muted
-		AudioServer.set_bus_mute(0, muted)
-		_save()
+		_toggle_mute()
+		return
 
 	if event.is_action_pressed("pause"):
 		if state == State.PLAY:
 			_set_state(State.PAUSED)
 		elif state == State.PAUSED:
 			_set_state(State.PLAY)
+		return
 
 	if event.is_action_pressed("restart"):
 		if state == State.PLAY or state == State.PAUSED:
 			_retry_room()
-
-	if event.is_action_pressed("confirm"):
-		match state:
-			State.TITLE:
-				_start_room(title_pick)
-			State.CLEAR:
-				_next_room()
-			State.VICTORY:
-				_to_title()
-			State.PAUSED:
-				_set_state(State.PLAY)
-
-	if event.is_action_pressed("jump"):
-		match state:
-			State.TITLE:
-				_start_room(title_pick)
-			State.CLEAR:
-				_next_room()
-			State.VICTORY:
-				_to_title()
+		return
 
 	if state == State.TITLE:
 		if event.is_action_pressed("move_left"):
 			title_pick = maxi(0, title_pick - 1)
 			_build_room(title_pick)
-		elif event.is_action_pressed("move_right"):
+			return
+		if event.is_action_pressed("move_right"):
 			title_pick = mini(unlocked, title_pick + 1)
 			_build_room(title_pick)
+			return
+		# any other key starts the run, so no one gets stuck on the title
+		_advance()
+		return
+
+	if event.is_action_pressed("confirm") or event.is_action_pressed("jump"):
+		_advance()
+
+
+func _advance() -> void:
+	match state:
+		State.TITLE:
+			_start_room(title_pick)
+		State.CLEAR:
+			_next_room()
+		State.VICTORY:
+			_to_title()
+		State.PAUSED:
+			_set_state(State.PLAY)
+		State.DEAD:
+			_retry_room()
+
+
+func _toggle_mute() -> void:
+	muted = not muted
+	AudioServer.set_bus_mute(0, muted)
+	_save()
 
 
 func _process(delta: float) -> void:
@@ -457,12 +483,12 @@ func _refresh_hud() -> void:
 	hud.panel_title = "Room Cleared"
 	hud.panel_subtitle = str(room.get("name", ""))
 	hud.panel_lines = ["Deaths %d" % deaths]
-	hud.panel_footer = "Press ENTER for the next room"
+	hud.panel_footer = "Press ENTER or click for the next room"
 	if hud.mode == "victory":
 		hud.panel_title = "You Beat The Ruins"
 		hud.panel_subtitle = "Every trap, every lie, every door."
 		hud.panel_lines = ["Rooms %d" % ROOMS.size()]
-		hud.panel_footer = "Press ENTER to return to the title"
+		hud.panel_footer = "Press ENTER or click to return to the title"
 	hud.queue_redraw()
 
 

@@ -78,7 +78,7 @@ func _draw() -> void:
 		"dead":
 			_draw_death()
 		"paused":
-			_draw_panel("Paused", room_name, ["Deaths this room: %d" % deaths], "P / ENTER resume   ·   R restart room", Color(0.47, 0.78, 1.0, 0.3))
+			_draw_panel("Paused", room_name, ["Deaths this room: %d" % deaths], "P / ENTER / click resumes   ·   R restarts the room", Color(0.47, 0.78, 1.0, 0.3))
 		"clear":
 			_draw_panel(panel_title, panel_subtitle, panel_lines, panel_footer, Color(1.0, 0.84, 0.47, 0.5))
 		"victory":
@@ -161,5 +161,11 @@ func _draw_title() -> void:
 	if best_deaths >= 0:
 		line += "   ·   best %d death%s" % [best_deaths, "" if best_deaths == 1 else "s"]
 	_text_centered(line, 386.0, 15, Color(0.82, 0.89, 0.96, 0.8))
-	_text_centered("PRESS ENTER TO PLAY", 440.0, 21, Color(1.0, 0.91, 0.66, 0.95))
-	_text_centered("← → move   ·   SPACE jump   ·   R restart   ·   P pause   ·   M sound", 486.0, 15, Color(0.75, 0.82, 0.89, 0.72))
+	# the start target: clickable, tappable, and only decoration for the keyboard
+	var button := Rect2(W * 0.5 - 150.0, 410.0, 300.0, 62.0)
+	draw_rect(button, Color(1.0, 0.85, 0.42, 0.96))
+	draw_rect(button, Color(1.0, 1.0, 1.0, 0.9), false, 2.0)
+	_text_centered("START", 452.0, 27, Color(0.13, 0.1, 0.06, 1.0))
+
+	_text_centered("Click, tap or press any key", 502.0, 16, Color(0.97, 0.99, 1.0, 0.9))
+	_text_centered("← → choose room   ·   SPACE jump   ·   R restart   ·   P pause   ·   M sound", 540.0, 14, Color(0.8, 0.87, 0.94, 0.75))

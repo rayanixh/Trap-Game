@@ -20,8 +20,9 @@ art atlases and sound effects are already committed under `godot/assets/`.
 # run from a terminal instead of the editor
 godot --path godot
 
-# headless gameplay smoke test (101 checks: art, every room's traps, death, retry, doors)
+# headless tests: 101 gameplay checks + 13 menu-input checks
 godot --headless --path godot tests/smoke.tscn
+godot --headless --path godot tests/input_test.tscn
 ```
 
 Everything is built in code: `scripts/rooms.gd` holds the ten rooms, `scripts/trap.gd`
@@ -37,7 +38,7 @@ Progress is written to `user://trap_game.cfg` (unlocked rooms and best death cou
 | Restart | `R`                      |
 | Pause   | `P` or `Esc`             |
 | Sound   | `M`                      |
-| Menu    | `Enter`                  |
+| Menu    | `Enter`, click or tap    |
 
 ## Play in the browser
 
