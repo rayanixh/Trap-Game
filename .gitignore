@@ -6,3 +6,5 @@ artifacts/
 docs/asset-preview/sprites/
 __pycache__/
 .DS_Store
+godot/.godot/
+godot/shots/
