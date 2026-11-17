@@ -109,6 +109,44 @@ func _ready() -> void:
 	await settle()
 	report(main.state == main.State.PLAY, "P resumes from pause")
 
+	# on-screen pad
+	var buttons: Array = main.controls.get_children()
+	report(buttons.size() == 3, "three on-screen buttons")
+	var on_screen := true
+	for button in buttons:
+		if button.position.x < 0.0 or button.position.y < 0.0:
+			on_screen = false
+		if button.position.x + button.size.x > 1280.0 or button.position.y + button.size.y > 720.0:
+			on_screen = false
+	report(on_screen, "buttons sit inside the screen")
+
+	main._start_room(0)
+	await settle()
+	var start_x: float = main.player.position.x
+	buttons[1].button_down.emit()
+	for frame in 24:
+		await get_tree().physics_frame
+	buttons[1].button_up.emit()
+	report(main.player.position.x > start_x + 20.0, "right button moves the player")
+
+	main._start_room(0)
+	await settle()
+	var ground_y: float = main.player.position.y
+	buttons[2].button_down.emit()
+	for frame in 10:
+		await get_tree().physics_frame
+	buttons[2].button_up.emit()
+	report(main.player.position.y < ground_y - 10.0, "jump button jumps")
+
+	main._start_room(0)
+	await settle()
+	var walk_x: float = main.player.position.x
+	buttons[0].button_down.emit()
+	for frame in 20:
+		await get_tree().physics_frame
+	buttons[0].button_up.emit()
+	report(main.player.position.x <= walk_x + 0.5, "left button does not walk right")
+
 	print("---")
 	print("%d failed" % failures)
 	get_tree().quit(0 if failures == 0 else 1)

@@ -39,6 +39,7 @@ Progress is written to `user://trap_game.cfg` (unlocked rooms and best death cou
 | Pause   | `P` or `Esc`             |
 | Sound   | `M`                      |
 | Menu    | `Enter`, click or tap    |
+| Touch   | on-screen ◀ ▶ and JUMP   |
 
 ## Play in the browser
 

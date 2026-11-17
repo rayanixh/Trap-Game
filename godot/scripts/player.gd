@@ -24,6 +24,12 @@ var active := false
 var dead := false
 var facing := 1
 
+# on-screen pad state, pushed in by the game each physics frame
+var ext_left := false
+var ext_right := false
+var ext_jump := false
+var ext_jump_pressed := false
+
 var _coyote := 0.0
 var _buffer := 0.0
 var _land_timer := 0.0
@@ -110,6 +116,8 @@ func _physics_process(delta: float) -> void:
 	var axis := 0.0
 	if active and not dead:
 		axis = Input.get_axis("move_left", "move_right")
+		if absf(axis) < 0.01:
+			axis = (1.0 if ext_right else 0.0) - (1.0 if ext_left else 0.0)
 
 	if absf(axis) > 0.01:
 		facing = 1 if axis > 0.0 else -1
@@ -119,7 +127,9 @@ func _physics_process(delta: float) -> void:
 		var drag := FRICTION if on_floor else FRICTION * 0.35
 		velocity.x = move_toward(velocity.x, 0.0, drag * delta)
 
-	if active and not dead and Input.is_action_just_pressed("jump"):
+	var jump_pressed := Input.is_action_just_pressed("jump") or ext_jump_pressed
+	ext_jump_pressed = false
+	if active and not dead and jump_pressed:
 		_buffer = JUMP_BUFFER
 	else:
 		_buffer = maxf(0.0, _buffer - delta)
@@ -133,7 +143,8 @@ func _physics_process(delta: float) -> void:
 
 	var gravity := GRAVITY
 	if velocity.y < 0.0:
-		gravity = GRAVITY_ASCEND if Input.is_action_pressed("jump") and not dead else GRAVITY * 1.5
+		var holding := Input.is_action_pressed("jump") or ext_jump
+		gravity = GRAVITY_ASCEND if holding and not dead else GRAVITY * 1.5
 	velocity.y = minf(velocity.y + gravity * delta, MAX_FALL)
 
 	var fall_speed := velocity.y

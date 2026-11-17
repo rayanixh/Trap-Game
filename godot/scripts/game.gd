@@ -12,6 +12,7 @@ const PLATFORM_SCRIPT := preload("res://scripts/platform.gd")
 const TRAP_SCRIPT := preload("res://scripts/trap.gd")
 const BACKDROP_SCRIPT := preload("res://scripts/backdrop.gd")
 const HUD_SCRIPT := preload("res://scripts/hud.gd")
+const TOUCH_CONTROLS_SCRIPT := preload("res://scripts/touch_controls.gd")
 const PLAYER_SCENE := preload("res://scenes/player.tscn")
 const ROOMS_DATA := preload("res://scripts/rooms.gd")
 
@@ -37,6 +38,12 @@ var door_hidden := false
 
 var player
 var hud
+var controls
+
+var touch_left := false
+var touch_right := false
+var touch_jump := false
+var touch_jump_queued := false
 
 var deaths := 0
 var hint_timer := 0.0
@@ -74,6 +81,16 @@ func _ready() -> void:
 	add_child(layer)
 	hud = HUD_SCRIPT.new()
 	layer.add_child(hud)
+
+	# on-screen pad, above the HUD so it always wins the pointer
+	var controls_layer := CanvasLayer.new()
+	controls_layer.layer = 2
+	add_child(controls_layer)
+	controls = TOUCH_CONTROLS_SCRIPT.new()
+	controls_layer.add_child(controls)
+	controls.move_left_changed.connect(_on_touch_left)
+	controls.move_right_changed.connect(_on_touch_right)
+	controls.jump_changed.connect(_on_touch_jump)
 
 	title_pick = clampi(unlocked, 0, ROOMS.size() - 1)
 	_build_room(title_pick)
@@ -364,6 +381,7 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_apply_touch_input()
 	match state:
 		State.PLAY:
 			_tick_play(delta)
@@ -373,6 +391,41 @@ func _physics_process(delta: float) -> void:
 				_retry_room()
 		_:
 			pass
+
+
+func _apply_touch_input() -> void:
+	if player == null:
+		return
+	player.ext_left = touch_left
+	player.ext_right = touch_right
+	player.ext_jump = touch_jump
+	if touch_jump_queued:
+		player.ext_jump_pressed = true
+		touch_jump_queued = false
+
+
+func _on_touch_left(down: bool) -> void:
+	touch_left = down
+	if down and state == State.TITLE:
+		title_pick = maxi(0, title_pick - 1)
+		_build_room(title_pick)
+
+
+func _on_touch_right(down: bool) -> void:
+	touch_right = down
+	if down and state == State.TITLE:
+		title_pick = mini(unlocked, title_pick + 1)
+		_build_room(title_pick)
+
+
+func _on_touch_jump(down: bool) -> void:
+	touch_jump = down
+	if not down:
+		return
+	if state == State.PLAY:
+		touch_jump_queued = true
+	else:
+		_advance()
 
 
 func _tick_play(delta: float) -> void:
