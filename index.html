@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#10131a" />
+    <title>Trap Game — Every Door Lies</title>
+    <meta
+      name="description"
+      content="A hand-drawn troll platformer: ten rooms, one door each, and the level is out to get you."
+    />
+    <link rel="icon" href="/assets/sprites/key.png" />
+  </head>
+  <body>
+    <main id="shell">
+      <canvas id="game" width="1280" height="720" aria-label="Trap Game"></canvas>
+      <p id="hint">
+        <span data-key="← →">move</span>
+        <span data-key="space">jump</span>
+        <span data-key="R">restart</span>
+        <span data-key="P">pause</span>
+        <span data-key="M">sound</span>
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
